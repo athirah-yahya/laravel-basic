@@ -100,7 +100,7 @@ class ProductController extends Controller
 	private function saveData(Request $request, string $id = null)
 	{
 		// get form data
-		$data = $request->all();
+		$inputData = $request->all();
 
 		// validate form data
 		$rules = [
@@ -115,7 +115,7 @@ class ProductController extends Controller
 			// 'name.required' => 'butuh name',
 		];
 
-		$validation = Validator::make($data, $rules, $customMessages);
+		$validation = Validator::make($inputData, $rules, $customMessages);
 		if ($validation->fails()) {
 			return Redirect::back()
 				->withErrors($validation)
@@ -123,8 +123,8 @@ class ProductController extends Controller
 		}
 
 		// clean up form data
-		unset($data['_token']);
-		unset($data['_method']);
+		unset($inputData['_token']);
+		unset($inputData['_method']);
 
 		// save form data to DB
 		$data = (new Product);
@@ -135,7 +135,7 @@ class ProductController extends Controller
 
 		DB::beginTransaction();
 		try {
-			foreach ($data as $column => $value) {
+			foreach ($inputData as $column => $value) {
 				$data->{$column} = $value;
 			}
 			
