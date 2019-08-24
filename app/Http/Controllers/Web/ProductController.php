@@ -18,11 +18,9 @@ class ProductController extends Controller
 	public function index(Request $request)
 	{
 		
-		dd(
-			(new Product)
-				->all()
-				->toArray()
-		);
+		$data = (new Product)
+			->all()
+			->toArray();
 
 		return view('product.index', compact('data'));
 	}
@@ -45,12 +43,6 @@ class ProductController extends Controller
 
 	public function edit(string $id)
 	{
-		// $data = DB::table("products")
-		// 	->where("id", "=", $id)
-		// 	->first();
-
-		// $data = collect($data);
-
 		$data = $this->getData($id);
 
 		return view('product.edit', compact("id", "data"));
@@ -86,6 +78,12 @@ class ProductController extends Controller
 // -------------------------------------------------------
 
 	private function getData(string $id) {
+		// $data = DB::table("products")
+		// 	->where("id", "=", $id)
+		// 	->first();
+
+		// $data = collect($data);
+
 		$data = (new Product)
 			->where("id", "=", $id)
 			->first();

@@ -8,10 +8,13 @@
 
         <br><br>
 
-        <a href="{{ route('product.show', 1) }}">detail product1</a><br>
-        <a href="{{ route('product.show', 2) }}">detail product2</a><br>
-        <a href="{{ route('product.show', 3) }}">detail product3</a><br>
-        <a href="{{ route('product.show', 4) }}">detail product4</a><br>
+        <ul>
+            @foreach ($data as $item)
+                detail product {{ $item["id"] }} 
+                <a href="{{ route('product.edit', $item["id"]) }}">EDIT</a>
+                <a href="{{ route('product.show', $item["id"]) }}">SHOW</a><br>
+            @endforeach
+        </ul>
 
         <br>
 
@@ -22,16 +25,6 @@
         <br>
         <br>
 
-
-        <ul>
-            @foreach ($data as $key => $value)
-                @if ($key === "age")
-                    @continue
-                @endif
-
-                <li>{{ $loop->iteration }}) {{ $key }} = {{ $value }}</li>
-            @endforeach
-        </ul>
 
     </body>
 
