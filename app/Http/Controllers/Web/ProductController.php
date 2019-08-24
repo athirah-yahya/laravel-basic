@@ -38,12 +38,75 @@ class ProductController extends Controller
 
 	public function store(Request $request)
 	{
+		return $this->saveData($request);
+	}
+
+// -------------------------------------------------------
+
+	public function edit(string $id)
+	{
+		// $data = DB::table("products")
+		// 	->where("id", "=", $id)
+		// 	->first();
+
+		// $data = collect($data);
+
+		$data = $this->getData($id);
+
+		return view('product.edit', compact("id", "data"));
+	}
+
+// -------------------------------------------------------
+
+	public function update(Request $request, string $id)
+	{
+		return $this->saveData($request, $id);
+	}
+
+// -------------------------------------------------------
+
+	public function destroy(string $id)
+	{
+		$data = $this->getData($id);
+
+		$data->delete();
+
+		return Redirect::route('product.index');				
+	}
+
+// -------------------------------------------------------
+
+	public function show($id)
+	{
+		$data = $this->getData($id);
+
+		return view('product.show', compact('data', 'id'));
+	}
+
+// -------------------------------------------------------
+
+	private function getData(string $id) {
+		$data = (new Product)
+			->where("id", "=", $id)
+			->first();
+
+		if (is_null($data)) {
+			abort(404);
+		}
+
+		return $data;
+	}
+
+// -------------------------------------------------------
+
+	private function saveData(Request $request, string $id = null)
+	{
 		// get form data
 		$data = $request->all();
 
 		// validate form data
 		$rules = [
-			'sku' => 'required|min:7|unique:products,sku,null,id,deleted_at,NULL',
+			'sku' => "required|min:7|unique:products,sku,$id,id,deleted_at,NULL",
 			'name' => 'required|min:7',
 			'stock' => 'required|numeric|min:0',
 			'price' => 'required|numeric|min:0',
@@ -63,17 +126,22 @@ class ProductController extends Controller
 
 		// clean up form data
 		unset($data['_token']);
+		unset($data['_method']);
 
 		// save form data to DB
-		$product = (new Product);
+		$data = (new Product);
+
+		if (!is_null($id)) {
+			$data = $this->getData($id);
+		}
 
 		DB::beginTransaction();
 		try {
 			foreach ($data as $column => $value) {
-				$product->{$column} = $value;
+				$data->{$column} = $value;
 			}
 			
-			$product->save();
+			$data->save();
 		} catch (Exception $e) {
 			DB::rollback();
 
@@ -85,12 +153,4 @@ class ProductController extends Controller
 
 		return Redirect::route('product.index');
 	}
-
-// -------------------------------------------------------
-
-	public function show($id)
-	{
-		return view('product.show', compact('id'));
-	}
-
 }
