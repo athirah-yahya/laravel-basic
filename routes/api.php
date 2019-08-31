@@ -20,21 +20,20 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::namespace('Api')
 	->group(function () {
 		
-		Route::name('product.')
-			->prefix('products')
+		Route::prefix('products')
 			->group(function() {
 
-				Route::get('/', 'ProductController@index')->name('index');
+				Route::get('/', 'ProductController@index');
 				
-				Route::get('create/', 'ProductController@create')->name('create');
-				Route::post('/', 'ProductController@store')->name('store');
+				// Route::get('create/', 'ProductController@create');
+				Route::post('/', 'ProductController@store');
 				
-				Route::get('{id}/edit/', 'ProductController@edit')->name('edit');
-				Route::put('{id}/', 'ProductController@update')->name('update');
+				// Route::get('{id}/edit/', 'ProductController@edit');
+				Route::put('{id}/', 'ProductController@update');
 				
-				Route::delete('{id}/', 'ProductController@destroy')->name('destroy');
+				Route::delete('{id}/', 'ProductController@destroy');
 				
-				Route::get('{id}/', 'ProductController@show')->name('show');
+				Route::get('{id}/', 'ProductController@show');
 
 			}
 		);

@@ -17,15 +17,12 @@ class ProductController extends Controller
 {
 	public function index(Request $request)
 	{
-		
 		$data = (new Product)
 			->all()
 			->toArray();
 
-		return response()->json([
-			"status" => "SUCCESS",
-			"code" => "000",
-			"data" => ["products" => $data],
+		return $this->constructSuccessResponse([
+			"products" => $data,
 		]);
 
 // api/products?page=1&search=asd&sort=-name&category=car,bike&status=ACTIVE
@@ -90,32 +87,50 @@ class ProductController extends Controller
 
 // -------------------------------------------------------
 	
-	public function create()
-	{
-		return view('product.create');
-	}
+	// public function create()
+	// {
+	// 	return view('product.create');
+	// }
 
 // -------------------------------------------------------
 
 	public function store(Request $request)
 	{
-		return $this->saveData($request);
+		$data = $this->saveData($request);
+
+		if (isset($data["error"])) {
+			return $this->constructSuccessResponse($data["error"]);
+		}
+
+		return $this->constructSuccessResponse([
+			"created_id" => $data->id,
+			"product" => $data,
+		]);
 	}
 
 // -------------------------------------------------------
 
-	public function edit(string $id)
-	{
-		$data = $this->getData($id);
+	// public function edit(string $id)
+	// {
+	// 	$data = $this->getData($id);
 
-		return view('product.edit', compact("id", "data"));
-	}
+	// 	return view('product.edit', compact("id", "data"));
+	// }
 
 // -------------------------------------------------------
 
 	public function update(Request $request, string $id)
 	{
-		return $this->saveData($request, $id);
+		$data = $this->saveData($request, $id);
+
+		if (isset($data["error"])) {
+			return $this->constructSuccessResponse($data["error"]);
+		}
+
+		return $this->constructSuccessResponse([
+			"updated_id" => $id,
+			"product" => $data,
+		]);
 	}
 
 // -------------------------------------------------------
@@ -126,7 +141,9 @@ class ProductController extends Controller
 
 		$data->delete();
 
-		return Redirect::route('product.index');				
+		return $this->constructSuccessResponse([
+			"deleted_id" => $id,
+		]);			
 	}
 
 // -------------------------------------------------------
@@ -135,10 +152,30 @@ class ProductController extends Controller
 	{
 		$data = $this->getData($id);
 
+		return $this->constructSuccessResponse([
+			"product" => $data,
+		]);
+	}
+
+// -------------------------------------------------------
+
+	private function constructerrorResponse($errors)
+	{
+		return response()->json([
+			"status" => "ERROR",
+			"code" => "911",
+			"message" => implode("|", $errors),
+		]);
+	}
+
+// -------------------------------------------------------
+
+	private function constructSuccessResponse($data)
+	{
 		return response()->json([
 			"status" => "SUCCESS",
 			"code" => "000",
-			"data" => ["product" => $data],
+			"data" => $data,
 		]);
 	}
 
@@ -184,9 +221,12 @@ class ProductController extends Controller
 
 		$validation = Validator::make($inputData, $rules, $customMessages);
 		if ($validation->fails()) {
-			return Redirect::back()
-				->withErrors($validation)
-				->withInput();
+
+			return ["error" => $validation->errors()->all()];
+			
+			// return Redirect::back()
+			// 	->withErrors($validation)
+			// 	->withInput();
 		}
 
 		// clean up form data
@@ -210,12 +250,14 @@ class ProductController extends Controller
 		} catch (Exception $e) {
 			DB::rollback();
 
-			return Redirect::back()
-				->withErrors(['error' => $e->getMessage()])
-				->withInput();
+			return ["error" => $e->getMessage()];
+
+			// return Redirect::back()
+			// 	->withErrors(['error' => $e->getMessage()])
+			// 	->withInput();
 		}
 		DB::commit();
 
-		return Redirect::route('product.index');
+		return $data;
 	}
 }
